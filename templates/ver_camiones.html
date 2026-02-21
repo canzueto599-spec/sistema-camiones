@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistema de Camiones</title>
+</head>
+<body>
+
+    <h1>Lista de Camiones</h1>
+
+    <a href="/agregar">Agregar Camión</a>
+
+    <hr>
+
+    {% if camiones %}
+        <ul>
+        {% for camion in camiones %}
+            <li>
+                {{ camion.marca }} - {{ camion.modelo }} - {{ camion.placas }}
+                | <a href="/camion/{{ camion.id }}">Ver</a>
+                | <a href="/qr/{{ camion.id }}">QR</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay camiones registrados.</p>
+    {% endif %}
+
+</body>
+</html>
