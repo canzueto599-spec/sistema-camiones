@@ -1,99 +1,73 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 import qrcode
 import os
 
 app = Flask(__name__)
 
-# ======================
-# CONEXIÓN A BASE DE DATOS
-# ======================
+# =========================
+# DATABASE
+# =========================
 
 def get_db():
     conn = sqlite3.connect("camiones.db")
     conn.row_factory = sqlite3.Row
     return conn
 
-
-# ======================
-# CREAR TABLA SI NO EXISTE
-# ======================
-
-def crear_tabla():
+def init_db():
     conn = get_db()
     conn.execute("""
         CREATE TABLE IF NOT EXISTS camiones (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             marca TEXT,
             modelo TEXT,
-            cilindros TEXT,
-            asientos TEXT,
-            combustible TEXT,
-            puertas TEXT,
-            tonelaje TEXT,
-            ejes TEXT
+            anio TEXT,
+            placas TEXT
         )
     """)
     conn.commit()
     conn.close()
 
-crear_tabla()
+init_db()
 
-
-# ======================
-# INICIO
-# ======================
+# =========================
+# HOME - VER CAMIONES
+# =========================
 
 @app.route("/")
-def inicio():
-    return redirect("/ver_camiones")
+def index():
+    conn = get_db()
+    camiones = conn.execute("SELECT * FROM camiones").fetchall()
+    conn.close()
+    return render_template("vercamiones.html", camiones=camiones)
 
-
-# ======================
+# =========================
 # AGREGAR CAMIÓN
-# ======================
+# =========================
 
 @app.route("/agregar", methods=["GET", "POST"])
 def agregar():
     if request.method == "POST":
         marca = request.form["marca"]
         modelo = request.form["modelo"]
-        cilindros = request.form["cilindros"]
-        asientos = request.form["asientos"]
-        combustible = request.form["combustible"]
-        puertas = request.form["puertas"]
-        tonelaje = request.form["tonelaje"]
-        ejes = request.form["ejes"]
+        anio = request.form["anio"]
+        placas = request.form["placas"]
 
         conn = get_db()
-        conn.execute("""
-            INSERT INTO camiones 
-            (marca, modelo, cilindros, asientos, combustible, puertas, tonelaje, ejes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (marca, modelo, cilindros, asientos, combustible, puertas, tonelaje, ejes))
+        conn.execute(
+            "INSERT INTO camiones (marca, modelo, anio, placas) VALUES (?, ?, ?, ?)",
+            (marca, modelo, anio, placas)
+        )
         conn.commit()
         conn.close()
 
-        return redirect("/ver_camiones")
+        return redirect(url_for("index"))
 
     return render_template("agregar.html")
 
-
-# ======================
-# VER CAMIONES
-# ======================
-
-@app.route("/ver_camiones")
-def ver_camiones():
-    conn = get_db()
-    camiones = conn.execute("SELECT * FROM camiones").fetchall()
-    conn.close()
-    return render_template("ver_camiones.html", camiones=camiones)
-
-
-# ======================
-# ELIMINAR
-# ======================
+# =========================
+# ELIMINAR CAMIÓN
+# =========================
 
 @app.route("/eliminar/<int:id>")
 def eliminar(id):
@@ -101,80 +75,42 @@ def eliminar(id):
     conn.execute("DELETE FROM camiones WHERE id = ?", (id,))
     conn.commit()
     conn.close()
-    return redirect("/ver_camiones")
+    return redirect(url_for("index"))
 
-
-# ======================
-# EDITAR
-# ======================
-
-@app.route("/editar/<int:id>", methods=["GET", "POST"])
-def editar(id):
-    conn = get_db()
-
-    if request.method == "POST":
-        marca = request.form["marca"]
-        modelo = request.form["modelo"]
-        cilindros = request.form["cilindros"]
-        asientos = request.form["asientos"]
-        combustible = request.form["combustible"]
-        puertas = request.form["puertas"]
-        tonelaje = request.form["tonelaje"]
-        ejes = request.form["ejes"]
-
-        conn.execute("""
-            UPDATE camiones
-            SET marca=?, modelo=?, cilindros=?, asientos=?, combustible=?, puertas=?, tonelaje=?, ejes=?
-            WHERE id=?
-        """, (marca, modelo, cilindros, asientos, combustible, puertas, tonelaje, ejes, id))
-        conn.commit()
-        conn.close()
-        return redirect("/ver_camiones")
-
-    camion = conn.execute("SELECT * FROM camiones WHERE id = ?", (id,)).fetchone()
-    conn.close()
-    return render_template("agregar.html", camion=camion)
-
-
-# ======================
+# =========================
 # GENERAR QR
-# ======================
+# =========================
 
 @app.route("/qr/<int:id>")
-def qr_camion(id):
+def generar_qr(id):
     conn = get_db()
-    camion = conn.execute(
-        "SELECT * FROM camiones WHERE id = ?", (id,)
-    ).fetchone()
+    camion = conn.execute("SELECT * FROM camiones WHERE id = ?", (id,)).fetchone()
     conn.close()
 
     if not camion:
         return "Camión no encontrado"
 
     data = f"""
-    Camión
+    Camión:
     Marca: {camion['marca']}
     Modelo: {camion['modelo']}
-    Cilindros: {camion['cilindros']}
-    Asientos: {camion['asientos']}
-    Combustible: {camion['combustible']}
-    Puertas: {camion['puertas']}
-    Tonelaje: {camion['tonelaje']}
-    Ejes: {camion['ejes']}
+    Año: {camion['anio']}
+    Placas: {camion['placas']}
     """
 
     img = qrcode.make(data)
 
-    os.makedirs("static/qrs", exist_ok=True)
-    path = f"static/qrs/camion_{id}.png"
+    if not os.path.exists("static"):
+        os.makedirs("static")
+
+    path = f"static/qr_{id}.png"
     img.save(path)
 
-    return render_template("qr.html", camion=camion, qr=path)
+    return render_template("qr.html", imagen=path)
 
-
-# ======================
-# RUN
-# ======================
+# =========================
+# RUN (IMPORTANTE PARA RENDER)
+# =========================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
