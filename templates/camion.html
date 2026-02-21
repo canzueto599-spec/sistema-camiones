@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Camión {{ camion.id }}</title>
+    <title>Detalle Camión</title>
 </head>
 <body>
-    <h1>Camión {{ camion.id }}</h1>
 
-    <ul>
-        <li><b>Marca:</b> {{ camion.marca }}</li>
-        <li><b>Modelo:</b> {{ camion.modelo }}</li>
-        <li><b>Año:</b> {{ camion.anio }}</li>
-        <li><b>Color:</b> {{ camion.color }}</li>
-    </ul>
+<h1>Detalle del Camión</h1>
 
-    <a href="/">⬅ Inicio</a>
+<p><strong>Marca:</strong> {{ camion.marca }}</p>
+<p><strong>Modelo:</strong> {{ camion.modelo }}</p>
+<p><strong>Año:</strong> {{ camion.anio }}</p>
+<p><strong>Placas:</strong> {{ camion.placas }}</p>
+
+<br>
+<a href="/">Volver</a>
+
 </body>
 </html>

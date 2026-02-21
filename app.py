@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
-import qrcode
 import os
+import qrcode
 
 app = Flask(__name__)
+
+# =========================
+# BASE DE DATOS
+# =========================
 
 DB_PATH = os.path.join(os.getcwd(), "camiones.db")
 
@@ -28,7 +32,10 @@ def init_db():
 
 init_db()
 
-# 🏠 INICIO
+# =========================
+# INICIO
+# =========================
+
 @app.route("/")
 def index():
     conn = get_db()
@@ -36,15 +43,17 @@ def index():
     conn.close()
     return render_template("ver_camiones.html", camiones=camiones)
 
+# =========================
+# AGREGAR
+# =========================
 
-# ➕ AGREGAR CAMIÓN
 @app.route("/agregar", methods=["GET", "POST"])
 def agregar():
     if request.method == "POST":
-        marca = request.form["marca"]
-        modelo = request.form["modelo"]
-        anio = request.form["anio"]
-        placas = request.form["placas"]
+        marca = request.form.get("marca")
+        modelo = request.form.get("modelo")
+        anio = request.form.get("anio")
+        placas = request.form.get("placas")
 
         conn = get_db()
         conn.execute(
@@ -58,20 +67,10 @@ def agregar():
 
     return render_template("agregar.html")
 
+# =========================
+# VER CAMIÓN
+# =========================
 
-# 📱 GENERAR QR
-@app.route("/qr/<int:id>")
-def generar_qr(id):
-    data = f"https://sistema-camiones.onrender.com/camion/{id}"
-    img = qrcode.make(data)
-
-    path = os.path.join("static", f"qr_{id}.png")
-    img.save(path)
-
-    return render_template("qr.html", qr_image=f"qr_{id}.png")
-
-
-# 👀 VER CAMIÓN INDIVIDUAL
 @app.route("/camion/<int:id>")
 def ver_camion(id):
     conn = get_db()
@@ -82,6 +81,24 @@ def ver_camion(id):
 
     return render_template("camion.html", camion=camion)
 
+# =========================
+# GENERAR QR
+# =========================
+
+@app.route("/qr/<int:id>")
+def generar_qr(id):
+    url = f"https://sistema-camiones.onrender.com/camion/{id}"
+    img = qrcode.make(url)
+
+    if not os.path.exists("static"):
+        os.makedirs("static")
+
+    path = os.path.join("static", f"qr_{id}.png")
+    img.save(path)
+
+    return render_template("qr.html", imagen=f"qr_{id}.png")
+
+# =========================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

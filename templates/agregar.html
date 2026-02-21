@@ -4,37 +4,29 @@
     <title>Agregar Camión</title>
 </head>
 <body>
-    <h1>Agregar Camión</h1>
 
-    <form method="POST">
-        <label>Marca:</label><br>
-        <input name="marca" required><br><br>
+<h1>Agregar Camión</h1>
 
-        <label>Modelo:</label><br>
-        <input name="modelo" required><br><br>
+<form method="POST" action="/agregar">
 
-        <label>Cilindros:</label><br>
-        <input name="cilindros"><br><br>
+    <label>Marca:</label><br>
+    <input type="text" name="marca" required><br><br>
 
-        <label>Asientos:</label><br>
-        <input name="asientos"><br><br>
+    <label>Modelo:</label><br>
+    <input type="text" name="modelo" required><br><br>
 
-        <label>Combustible:</label><br>
-        <input name="combustible"><br><br>
+    <label>Año:</label><br>
+    <input type="text" name="anio" required><br><br>
 
-        <label>Puertas:</label><br>
-        <input name="puertas"><br><br>
+    <label>Placas:</label><br>
+    <input type="text" name="placas" required><br><br>
 
-        <label>Tonelaje:</label><br>
-        <input name="tonelaje"><br><br>
+    <button type="submit">Guardar</button>
 
-        <label>Ejes:</label><br>
-        <input name="ejes"><br><br>
+</form>
 
-        <button type="submit">Guardar Camión</button>
-    </form>
+<br>
+<a href="/">Volver</a>
 
-    <br>
-    <a href="/ver_camiones">Ver camiones</a>
 </body>
 </html>

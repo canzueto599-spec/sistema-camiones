@@ -1,24 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QR Camión</title>
+    <title>QR</title>
 </head>
 <body>
-    <h1>QR del Camión</h1>
 
-    <p><b>Marca:</b> {{ camion.marca }}</p>
-    <p><b>Modelo:</b> {{ camion.modelo }}</p>
-    <p><b>Cilindros:</b> {{ camion.cilindros }}</p>
-    <p><b>Asientos:</b> {{ camion.asientos }}</p>
-    <p><b>Combustible:</b> {{ camion.combustible }}</p>
-    <p><b>Puertas:</b> {{ camion.puertas }}</p>
-    <p><b>Tonelaje:</b> {{ camion.tonelaje }}</p>
-    <p><b>Ejes:</b> {{ camion.ejes }}</p>
+<h1>Código QR</h1>
 
-    <br>
-    <img src="/{{ qr }}" width="250">
+<img src="{{ url_for('static', filename=imagen) }}">
 
-    <br><br>
-    <a href="/ver_camiones">⬅ Volver</a>
+<br><br>
+<a href="/">Volver</a>
+
 </body>
 </html>
