@@ -1,16 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect
 import sqlite3
 import qrcode
 import os
 
 app = Flask(__name__)
 
-# =========================
-# DATABASE
-# =========================
+DB_PATH = os.path.join(os.getcwd(), "camiones.db")
 
 def get_db():
-    conn = sqlite3.connect("camiones.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -30,21 +28,16 @@ def init_db():
 
 init_db()
 
-# =========================
-# HOME - VER CAMIONES
-# =========================
-
+# 🏠 INICIO
 @app.route("/")
 def index():
     conn = get_db()
     camiones = conn.execute("SELECT * FROM camiones").fetchall()
     conn.close()
-    return render_template("vercamiones.html", camiones=camiones)
+    return render_template("ver_camiones.html", camiones=camiones)
 
-# =========================
-# AGREGAR CAMIÓN
-# =========================
 
+# ➕ AGREGAR CAMIÓN
 @app.route("/agregar", methods=["GET", "POST"])
 def agregar():
     if request.method == "POST":
@@ -61,56 +54,34 @@ def agregar():
         conn.commit()
         conn.close()
 
-        return redirect(url_for("index"))
+        return redirect("/")
 
     return render_template("agregar.html")
 
-# =========================
-# ELIMINAR CAMIÓN
-# =========================
 
-@app.route("/eliminar/<int:id>")
-def eliminar(id):
-    conn = get_db()
-    conn.execute("DELETE FROM camiones WHERE id = ?", (id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for("index"))
-
-# =========================
-# GENERAR QR
-# =========================
-
+# 📱 GENERAR QR
 @app.route("/qr/<int:id>")
 def generar_qr(id):
-    conn = get_db()
-    camion = conn.execute("SELECT * FROM camiones WHERE id = ?", (id,)).fetchone()
-    conn.close()
-
-    if not camion:
-        return "Camión no encontrado"
-
-    data = f"""
-    Camión:
-    Marca: {camion['marca']}
-    Modelo: {camion['modelo']}
-    Año: {camion['anio']}
-    Placas: {camion['placas']}
-    """
-
+    data = f"https://sistema-camiones.onrender.com/camion/{id}"
     img = qrcode.make(data)
 
-    if not os.path.exists("static"):
-        os.makedirs("static")
-
-    path = f"static/qr_{id}.png"
+    path = os.path.join("static", f"qr_{id}.png")
     img.save(path)
 
-    return render_template("qr.html", imagen=path)
+    return render_template("qr.html", qr_image=f"qr_{id}.png")
 
-# =========================
-# RUN (IMPORTANTE PARA RENDER)
-# =========================
+
+# 👀 VER CAMIÓN INDIVIDUAL
+@app.route("/camion/<int:id>")
+def ver_camion(id):
+    conn = get_db()
+    camion = conn.execute(
+        "SELECT * FROM camiones WHERE id = ?", (id,)
+    ).fetchone()
+    conn.close()
+
+    return render_template("camion.html", camion=camion)
+
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
