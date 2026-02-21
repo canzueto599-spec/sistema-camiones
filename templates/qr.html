@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Camión</title>
+</head>
+<body>
+    <h1>QR del Camión</h1>
+
+    <p><b>Marca:</b> {{ camion.marca }}</p>
+    <p><b>Modelo:</b> {{ camion.modelo }}</p>
+    <p><b>Cilindros:</b> {{ camion.cilindros }}</p>
+    <p><b>Asientos:</b> {{ camion.asientos }}</p>
+    <p><b>Combustible:</b> {{ camion.combustible }}</p>
+    <p><b>Puertas:</b> {{ camion.puertas }}</p>
+    <p><b>Tonelaje:</b> {{ camion.tonelaje }}</p>
+    <p><b>Ejes:</b> {{ camion.ejes }}</p>
+
+    <br>
+    <img src="/{{ qr }}" width="250">
+
+    <br><br>
+    <a href="/ver_camiones">⬅ Volver</a>
+</body>
+</html>
