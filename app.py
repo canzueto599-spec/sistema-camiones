@@ -1,30 +1,25 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 import os
 import qrcode
 
 app = Flask(__name__)
 
-# =========================
-# BASE DE DATOS
-# =========================
+DATABASE = "camiones.db"
 
-DB_PATH = os.path.join(os.getcwd(), "camiones.db")
-
-def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
+# ===============================
+# CREAR BASE DE DATOS
+# ===============================
 def init_db():
-    conn = get_db()
-    conn.execute("""
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS camiones (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            marca TEXT,
-            modelo TEXT,
-            anio TEXT,
-            placas TEXT
+            marca TEXT NOT NULL,
+            modelo TEXT NOT NULL,
+            anio TEXT NOT NULL,
+            placas TEXT NOT NULL
         )
     """)
     conn.commit()
@@ -32,21 +27,21 @@ def init_db():
 
 init_db()
 
-# =========================
+# ===============================
 # INICIO
-# =========================
-
+# ===============================
 @app.route("/")
 def index():
-    conn = get_db()
-    camiones = conn.execute("SELECT * FROM camiones").fetchall()
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM camiones")
+    camiones = cursor.fetchall()
     conn.close()
     return render_template("ver_camiones.html", camiones=camiones)
 
-# =========================
-# AGREGAR
-# =========================
-
+# ===============================
+# AGREGAR CAMION
+# ===============================
 @app.route("/agregar", methods=["GET", "POST"])
 def agregar():
     if request.method == "POST":
@@ -55,39 +50,38 @@ def agregar():
         anio = request.form.get("anio")
         placas = request.form.get("placas")
 
-        conn = get_db()
-        conn.execute(
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        cursor.execute(
             "INSERT INTO camiones (marca, modelo, anio, placas) VALUES (?, ?, ?, ?)",
             (marca, modelo, anio, placas)
         )
         conn.commit()
         conn.close()
 
-        return redirect("/")
+        return redirect(url_for("index"))
 
     return render_template("agregar.html")
 
-# =========================
-# VER CAMIÓN
-# =========================
-
+# ===============================
+# VER DETALLE
+# ===============================
 @app.route("/camion/<int:id>")
 def ver_camion(id):
-    conn = get_db()
-    camion = conn.execute(
-        "SELECT * FROM camiones WHERE id = ?", (id,)
-    ).fetchone()
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM camiones WHERE id = ?", (id,))
+    camion = cursor.fetchone()
     conn.close()
 
     return render_template("camion.html", camion=camion)
 
-# =========================
+# ===============================
 # GENERAR QR
-# =========================
-
+# ===============================
 @app.route("/qr/<int:id>")
 def generar_qr(id):
-    url = f"https://sistema-camiones.onrender.com/camion/{id}"
+    url = request.host_url + "camion/" + str(id)
     img = qrcode.make(url)
 
     if not os.path.exists("static"):
@@ -98,7 +92,6 @@ def generar_qr(id):
 
     return render_template("qr.html", imagen=f"qr_{id}.png")
 
-# =========================
-
+# ===============================
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

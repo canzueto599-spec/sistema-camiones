@@ -2,31 +2,42 @@
 <html>
 <head>
     <title>Agregar Camión</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 
-<h1>Agregar Camión</h1>
+<div class="container mt-5">
 
-<form method="POST" action="/agregar">
+    <h2>Agregar Camión</h2>
 
-    <label>Marca:</label><br>
-    <input type="text" name="marca" required><br><br>
+    <form method="POST">
 
-    <label>Modelo:</label><br>
-    <input type="text" name="modelo" required><br><br>
+        <div class="mb-3">
+            <label class="form-label">Marca</label>
+            <input type="text" name="marca" class="form-control" required>
+        </div>
 
-    <label>Año:</label><br>
-    <input type="text" name="anio" required><br><br>
+        <div class="mb-3">
+            <label class="form-label">Modelo</label>
+            <input type="text" name="modelo" class="form-control" required>
+        </div>
 
-    <label>Placas:</label><br>
-    <input type="text" name="placas" required><br><br>
+        <div class="mb-3">
+            <label class="form-label">Año</label>
+            <input type="text" name="anio" class="form-control" required>
+        </div>
 
-    <button type="submit">Guardar</button>
+        <div class="mb-3">
+            <label class="form-label">Placas</label>
+            <input type="text" name="placas" class="form-control" required>
+        </div>
 
-</form>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="/" class="btn btn-secondary">Volver</a>
 
-<br>
-<a href="/">Volver</a>
+    </form>
+
+</div>
 
 </body>
 </html>
